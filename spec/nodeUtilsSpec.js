@@ -5,43 +5,40 @@ var nodeUtils = require('../lib/nodeUtils');
 
 describe('nodeUtils', function() {
   describe('getIdentifierString', function() {
-    // acorn walker traverses with DFS, but unfortunately invokes the
-    // callbacks on children first
-
     it('returns an unordered string of identifiers', function() {
       // Simplify by only using intersectionA
       var nodes = [helpers.parse(fixtures.intersection)[0]];
       var string = nodeUtils.getIdentifierString(nodes);
-
-      expect(string).to.be('array1:filter:array2:indexOf:n:n:intersectionA:' +
-        'array1:array2');
+      expect(string).to.be(
+        'intersectionA:array1:array2:array1:filter:n:array2:indexOf:n'
+      );
     });
 
     it('traverses literals in member, object and function expressions', function() {
       var nodes = helpers.parse(fixtures.identifiers);
       var string = nodeUtils.getIdentifierString(nodes);
-
-      expect(string).to.be('cache:storage:cache:key:key:get:storage:cache:' +
-        'key:val:key:val:set:storage');
+      expect(string).to.be(
+        'storage:cache:get:key:storage:cache:key:set:key:val:storage:cache:key:val'
+      );
     });
   });
 
-  describe('isES6Module', function() {
+  describe('isES6ModuleImport', function() {
     it('returns true for an import declaration', function() {
       // ImportDeclaration
       var nodes = [helpers.parse(fixtures.es6Module)[0]];
-      expect(nodeUtils.isES6Module(nodes)).to.be(true);
+      expect(nodeUtils.isES6ModuleImport(nodes)).to.be(true);
     });
 
-    it('returns true for export declaration', function() {
+    it('returns false for export declaration', function() {
       // ExportNamedDeclaration
       var nodes = [helpers.parse(fixtures.es6Module)[1]];
-      expect(nodeUtils.isES6Module(nodes)).to.be(true);
+      expect(nodeUtils.isES6ModuleImport(nodes)).to.be(false);
     });
 
     it('returns false otherwise', function() {
       var nodes = helpers.parse(fixtures.commonjs);
-      expect(nodeUtils.isES6Module(nodes)).to.be(false);
+      expect(nodeUtils.isES6ModuleImport(nodes)).to.be(false);
     });
   });
 

@@ -1,7 +1,6 @@
 var expect       = require('expect.js');
 var EventEmitter = require('events').EventEmitter;
 var Inspector    = require('../lib/inspector.js');
-var Match        = require('../lib/match.js');
 var fixtures     = require('./fixtures');
 
 describe('Inspector', function() {
@@ -23,7 +22,6 @@ describe('Inspector', function() {
     it('accepts an array of file paths', function() {
       var filePaths = ['path1.js', 'path2.js'];
       var inspector = new Inspector(filePaths);
-
       expect(inspector._filePaths).to.be(filePaths);
     });
 
@@ -34,7 +32,6 @@ describe('Inspector', function() {
       };
 
       var inspector = new Inspector([], opts);
-
       expect(inspector._threshold).to.be(opts.threshold);
       expect(inspector._diff).to.be(opts.diff);
     });
@@ -75,7 +72,6 @@ describe('Inspector', function() {
 
       inspector.on('match', listener);
       inspector.run();
-
       expect(found).to.have.length(1);
     });
   });
@@ -91,11 +87,9 @@ describe('Inspector', function() {
     var match = found[0];
     expect(found).to.have.length(1);
     expect(match.nodes).to.have.length(2);
-
     expect(match.nodes[0].type).to.be('FunctionDeclaration');
     expect(match.nodes[0].loc.start).to.eql({line: 1, column: 0});
     expect(match.nodes[0].loc.end).to.eql({line: 5, column: 1});
-
     expect(match.nodes[1].type).to.be('FunctionDeclaration');
     expect(match.nodes[1].loc.start).to.eql({line: 7, column: 0});
     expect(match.nodes[1].loc.end).to.eql({line: 11, column: 1});
@@ -112,14 +106,63 @@ describe('Inspector', function() {
     var match = found[0];
     expect(found).to.have.length(1);
     expect(match.nodes).to.have.length(2);
-
     expect(match.nodes[0].type).to.be('FunctionDeclaration');
     expect(match.nodes[0].loc.start).to.eql({line: 1, column: 0});
     expect(match.nodes[0].loc.end).to.eql({line: 9, column: 1});
-
     expect(match.nodes[1].type).to.be('FunctionDeclaration');
     expect(match.nodes[1].loc.start).to.eql({line: 11, column: 0});
     expect(match.nodes[1].loc.end).to.eql({line: 19, column: 1});
+  });
+
+  it('supports ES6', function() {
+    var inspector = new Inspector([fixtures.es6ClassExport]);
+
+    inspector.on('match', listener);
+    inspector.run();
+
+    var match = found[0];
+    expect(found).to.have.length(1);
+    expect(match.nodes).to.have.length(2);
+    expect(match.nodes[0].type).to.be('ClassMethod');
+    expect(match.nodes[0].loc.start).to.eql({line: 2, column: 2});
+    expect(match.nodes[0].loc.end).to.eql({line: 6, column: 3});
+    expect(match.nodes[1].type).to.be('ClassMethod');
+    expect(match.nodes[1].loc.start).to.eql({line: 8, column: 2});
+    expect(match.nodes[1].loc.end).to.eql({line: 12, column: 3});
+  });
+
+  it('supports JSX', function() {
+    var inspector = new Inspector([fixtures.jsxTodo]);
+
+    inspector.on('match', listener);
+    inspector.run();
+
+    var match = found[0];
+    expect(found).to.have.length(1);
+    expect(match.nodes).to.have.length(2);
+    expect(match.nodes[0].type).to.be('FunctionDeclaration');
+    expect(match.nodes[0].loc.start).to.eql({line: 3, column: 0});
+    expect(match.nodes[0].loc.end).to.eql({line: 9, column: 1});
+    expect(match.nodes[1].type).to.be('FunctionDeclaration');
+    expect(match.nodes[1].loc.start).to.eql({line: 11, column: 0});
+    expect(match.nodes[1].loc.end).to.eql({line: 17, column: 1});
+  });
+
+  it('supports Flow', function() {
+    var inspector = new Inspector([fixtures.flowIntersection]);
+
+    inspector.on('match', listener);
+    inspector.run();
+
+    var match = found[0];
+    expect(found).to.have.length(1);
+    expect(match.nodes).to.have.length(2);
+    expect(match.nodes[0].type).to.be('FunctionDeclaration');
+    expect(match.nodes[0].loc.start).to.eql({line: 1, column: 0});
+    expect(match.nodes[0].loc.end).to.eql({line: 5, column: 1});
+    expect(match.nodes[1].type).to.be('FunctionDeclaration');
+    expect(match.nodes[1].loc.start).to.eql({line: 7, column: 0});
+    expect(match.nodes[1].loc.end).to.eql({line: 11, column: 1});
   });
 
   it('includes a diff with the match, if enabled', function() {
@@ -146,7 +189,6 @@ describe('Inspector', function() {
 
     inspector.on('match', listener);
     inspector.run();
-
     expect(found).to.have.length(1);
     expect(found[0].nodes).to.have.length(3);
   });
@@ -158,7 +200,6 @@ describe('Inspector', function() {
 
     inspector.on('match', listener);
     inspector.run();
-
     expect(found).to.have.length(0);
   });
 
@@ -169,7 +210,6 @@ describe('Inspector', function() {
 
     inspector.on('match', listener);
     inspector.run();
-
     expect(found).to.have.length(0);
   });
 });
